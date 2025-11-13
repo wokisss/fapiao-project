@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发票查询系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>发票查询管理系统</h1>
+            <p class="subtitle">上传、解析、查询、下载、编辑 (前后端分离版)</p>
+        </header>
+
+        <div id="flash-container"></div>
+
+        <section class="action-section">
+            <div class="upload-section">
+                <h2>1. 增 (Create) - 上传ZIP包</h2>
+                <form id="upload-form">
+                    <input type="file" name="zip_file" id="zip-file-input" accept=".zip" required>
+                    <button type="submit" class="upload-btn" id="upload-btn">
+                        <i class="fas fa-upload"></i> 上传并处理
+                    </button>
+                </form>
+            </div>
+            <div class="search-section">
+                <h2>2. 查 (Read) - 搜索发票</h2>
+                <form id="search-form">
+                    <input type="text" name="search" id="search-input" class="search-input" placeholder="代码、号码、购买方或销售方...">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> 查询
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section class="invoice-section">
+             <form id="download-form">
+                <div class="invoice-header">
+                    <div class="invoice-title">发票列表 (查/改/删)</div>
+                    <div class="invoice-actions">
+                        <label class="select-all">
+                            <input type="checkbox" id="select-all"> 全选
+                        </label>
+                        <button type="submit" class="download-btn" id="download-selected" disabled>
+                            <i class="fas fa-download"></i> 打包下载 (0)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>选择</th>
+                                <th>发票代码</th>
+                                <th>发票号码</th>
+                                <th>开票日期</th>
+                                <th>金额</th>
+                                <th>价税合计</th>
+                                <th>购买方</th>
+                                <th>销售方</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-table-body">
+                            <tr>
+                                <td colspan="9" style="text-align:center; padding: 20px;">
+                                    正在加载...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <div class="no-invoices" id="no-invoices" style="display: none;">
+                <i class="fas fa-file-invoice" style="font-size: 3rem; margin-bottom: 15px; color: #ccc;"></i>
+                <p>没有找到符合条件的发票</p>
+            </div>
+        </section>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                 <div class="stat-value" id="stat-total-count">0</div>
+                <div class="stat-label">当前查询总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-total-amount">¥0.00</div>
+                <div class="stat-label">总金额</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-total-tax-amount">¥0.00</div>
+                <div class="stat-label">价税合计</div>
+            </div>
+        </div>
+
+        <section class="danger-zone" style="margin-top: 20px;">
+            <h2>危险操作</h2>
+            <p style="margin-bottom: 10px;">此操作将永久删除数据库中的所有发票记录和已解压的PDF文件。</p>
+             <form id="clear-database-form">
+                <button type="submit" class="clear-btn">清空数据库和文件</button>
+            </form>
+        </section>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑发票 (ID: <span id="edit-id-display"></span>)</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <div class="form-group full-width">
+                        <label for="edit-buyer_name">购买方</label>
+                        <input type="text" id="edit-buyer_name" name="buyer_name">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-seller_name">销售方</label>
+                        <input type="text" id="edit-seller_name" name="seller_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-invoice_code">发票代码</label>
+                        <input type="text" id="edit-invoice_code" name="invoice_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-invoice_number">发票号码</label>
+                        <input type="text" id="edit-invoice_number" name="invoice_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-issue_date">开票日期</label>
+                        <input type="date" id="edit-issue_date" name="issue_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-amount">金额 (Amount)</label>
+                        <input type="number" step="0.01" id="edit-amount" name="amount">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-total_amount">价税合计 (Total Amount)</label>
+                        <input type="number" step="0.01" id="edit-total_amount" name="total_amount">
+                    </div>
+                    <div class="modal-footer full-width">
+                        <button type="submit" class="modal-save-btn">保存更改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/main.js"></script>
+</body>
+</html>
