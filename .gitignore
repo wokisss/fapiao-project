@@ -1,0 +1,11 @@
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+
+# 忽略 数据库文件
+*.db
+*.sqlite3
+
+# 忽略 虚拟环境 (如果有)
+venv/
+.env
