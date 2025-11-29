@@ -79,6 +79,8 @@ def _extract_fapiao_info(page, full_text, pdf_path):
     # 区域 1 (buyer_text):
     buyer_name_match = re.search(r'名\s*称\s*[:：]?\s*([^\n]+)', buyer_text, re.IGNORECASE)
     buyer_name = buyer_name_match.group(1).strip() if buyer_name_match else 'Unknown'
+    buyer_tax_id_match = re.search(r'纳税人识别号\s*[:：]?\s*([A-Z0-9]+)', buyer_text, re.IGNORECASE)
+    buyer_tax_id = buyer_tax_id_match.group(1).strip() if buyer_tax_id_match else ''
 
     # 区域 2 (meta_text):
     invoice_code_match = re.search(r'发票代码\s*[:：]?\s*(\w+)', meta_text)
@@ -97,6 +99,8 @@ def _extract_fapiao_info(page, full_text, pdf_path):
     # "销售方名称"
     seller_name_match = re.search(r'名\s*称\s*[:：]?\s*([^\n]+)', seller_text, re.IGNORECASE)
     seller_name = seller_name_match.group(1).strip() if seller_name_match else 'Unknown'
+    seller_tax_id_match = re.search(r'纳税人识别号\s*[:：]?\s*([A-Z0-9]+)', seller_text, re.IGNORECASE)
+    seller_tax_id = seller_tax_id_match.group(1).strip() if seller_tax_id_match else ''
 
     # --- (*** 关键修复 (价税合计) - 新的多策略逻辑 ***) ---
 
@@ -149,7 +153,7 @@ def _extract_fapiao_info(page, full_text, pdf_path):
 
     # 5. 返回结果 (保持不变)
     return [
-        ('invoice', summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, seller_name,
+        ('invoice', summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, buyer_tax_id, seller_name, seller_tax_id,
          pdf_path)]
 
 
@@ -163,8 +167,11 @@ def _extract_summary_info(full_text, tables, pdf_path):
     summary_id = summary_id_match.group(1) if summary_id_match else None
     buyer_name_match = re.search(r'购\s*买\s*方\s*名\s*称\s*[:：]?\s*([^\n]+)', full_text, re.IGNORECASE)
     buyer_name = buyer_name_match.group(1).strip() if buyer_name_match else 'Unknown'
+    buyer_tax_id_match = re.search(r'纳税人识别号\s*[:：]?\s*([A-Z0-9]+)', full_text, re.IGNORECASE)
+    buyer_tax_id = buyer_tax_id_match.group(1).strip() if buyer_tax_id_match else ''
     seller_name_match = re.search(r'销\s*售\s*方\s*名\s*称\s*[:：]?\s*([^\n]+)', full_text, re.IGNORECASE)
     seller_name = seller_name_match.group(1).strip() if seller_name_match else '收费公路管理方'
+    seller_tax_id = '' # Summary invoices don't have seller tax id
     issue_date_match = re.search(r'(开票申请日期|开票日期)\s*[:：]?\s*(\d{4}-\d{2}-\d{2}|\d{4}年\d{2}月\d{2}日)',
                                  full_text, re.IGNORECASE | re.DOTALL)
     issue_date_str = issue_date_match.group(2) if issue_date_match else None
@@ -189,7 +196,7 @@ def _extract_summary_info(full_text, tables, pdf_path):
                         infos.append((
                             'summary', summary_id, invoice_code, invoice_number,
                             issue_date, amount, total_amount,  # total_amount 是单据总计
-                            buyer_name, seller_name, pdf_path
+                            buyer_name, buyer_tax_id, seller_name, seller_tax_id, pdf_path
                         ))
     return infos
 

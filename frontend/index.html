@@ -62,13 +62,15 @@
                                 <th>金额</th>
                                 <th>价税合计</th>
                                 <th>购买方</th>
+                                <th>购买方纳税人识别号</th>
                                 <th>销售方</th>
+                                <th>销售方纳税人识别号</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="invoice-table-body">
                             <tr>
-                                <td colspan="9" style="text-align:center; padding: 20px;">
+                                <td colspan="11" style="text-align:center; padding: 20px;">
                                     正在加载...
                                 </td>
                             </tr>
@@ -119,8 +121,16 @@
                         <input type="text" id="edit-buyer_name" name="buyer_name">
                     </div>
                     <div class="form-group full-width">
+                        <label for="edit-buyer_tax_id">购买方纳税人识别号</label>
+                        <input type="text" id="edit-buyer_tax_id" name="buyer_tax_id">
+                    </div>
+                    <div class="form-group full-width">
                         <label for="edit-seller_name">销售方</label>
                         <input type="text" id="edit-seller_name" name="seller_name">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-seller_tax_id">销售方纳税人识别号</label>
+                        <input type="text" id="edit-seller_tax_id" name="seller_tax_id">
                     </div>
                     <div class="form-group">
                         <label for="edit-invoice_code">发票代码</label>

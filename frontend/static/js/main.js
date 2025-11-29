@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function loadInvoices(searchTerm = '') {
         // 1. 显示加载中
-        invoiceTableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 正在加载...</td></tr>';
+        invoiceTableBody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 正在加载...</td></tr>';
         noInvoicesMessage.style.display = 'none';
 
         try {
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? "加载失败：无法连接到后端服务 (请确保 backend/run.py 正在运行)"
                 : `加载失败: ${error.message}`;
 
-            invoiceTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px; color: red;">${msg}</td></tr>`;
+            invoiceTableBody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px; color: red;">${msg}</td></tr>`;
             showNotification(msg, 'error');
             updateStats({}); // 清空统计
         }
@@ -102,7 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="invoice-amount">${amount}</td>
                     <td class="invoice-amount">${totalAmount}</td>
                     <td>${inv.buyer_name || 'N/A'}</td>
+                    <td>${inv.buyer_tax_id || 'N/A'}</td>
                     <td>${inv.seller_name || 'N/A'}</td>
+                    <td>${inv.seller_tax_id || 'N/A'}</td>
                     <td>
                         <a href="${API_BASE_URL}/download/${inv.id}" class="action-btn download-link" title="下载" target="_blank">
                             <i class="fas fa-download"></i>
@@ -116,7 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             data-amount="${inv.amount || 0.0}"
                             data-total_amount="${inv.total_amount || 0.0}"
                             data-buyer="${inv.buyer_name || ''}"
-                            data-seller="${inv.seller_name || ''}">
+                            data-buyer_tax_id="${inv.buyer_tax_id || ''}"
+                            data-seller="${inv.seller_name || ''}"
+                            data-seller_tax_id="${inv.seller_tax_id || ''}">
                             <i class="fas fa-edit"></i>
                         </button>
 
@@ -366,7 +370,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 1. 填充表单内容
                 editIdDisplay.textContent = data.id;
                 document.getElementById('edit-buyer_name').value = data.buyer;
+                document.getElementById('edit-buyer_tax_id').value = data.buyer_tax_id;
                 document.getElementById('edit-seller_name').value = data.seller;
+                document.getElementById('edit-seller_tax_id').value = data.seller_tax_id;
                 document.getElementById('edit-invoice_code').value = data.code;
                 document.getElementById('edit-invoice_number').value = data.number;
                 document.getElementById('edit-issue_date').value = data.date;
@@ -480,7 +486,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 从表单收集数据
         const data = {
             buyer_name: document.getElementById('edit-buyer_name').value,
+            buyer_tax_id: document.getElementById('edit-buyer_tax_id').value,
             seller_name: document.getElementById('edit-seller_name').value,
+            seller_tax_id: document.getElementById('edit-seller_tax_id').value,
             invoice_code: document.getElementById('edit-invoice_code').value,
             invoice_number: document.getElementById('edit-invoice_number').value,
             issue_date: document.getElementById('edit-issue_date').value,

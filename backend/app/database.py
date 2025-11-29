@@ -67,7 +67,9 @@ def create_db_and_table():
             amount REAL,
             total_amount REAL,
             buyer_name TEXT,
+            buyer_tax_id TEXT,
             seller_name TEXT,
+            seller_tax_id TEXT,
             file_path TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             -- 添加唯一约束防止重复 (发票代码 + 发票号码)
@@ -96,7 +98,7 @@ def add_invoice_record(info, permanent_path):
     (由 invoice_parser.py 调用)
     向数据库中添加一条发票记录。
     """
-    (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, seller_name,
+    (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, buyer_tax_id, seller_name, seller_tax_id,
      pdf_path) = info
 
     db = get_db()
@@ -104,10 +106,10 @@ def add_invoice_record(info, permanent_path):
         db.execute(
             """
             INSERT INTO invoices 
-            (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, seller_name, file_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, buyer_tax_id, seller_name, seller_tax_id, file_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, seller_name,
+            (type, summary_id, invoice_code, invoice_number, issue_date, amount, total_amount, buyer_name, buyer_tax_id, seller_name, seller_tax_id,
              permanent_path)
         )
         db.commit()
@@ -137,8 +139,10 @@ def get_invoices(search_term=''):
             OR invoice_number LIKE ? 
             OR summary_id LIKE ? 
             OR file_path LIKE ?
+            OR buyer_tax_id LIKE ?
+            OR seller_tax_id LIKE ?
         """
-        params = [like_term] * 5
+        params = [like_term] * 7
 
     query += " ORDER BY issue_date DESC, id DESC"
 
@@ -169,11 +173,13 @@ def update_invoice_record(invoice_id, data):
         db.execute(
             """
             UPDATE invoices SET 
-            buyer_name = ?, seller_name = ?, issue_date = ?, amount = ?, total_amount = ?
+            buyer_name = ?, seller_name = ?, issue_date = ?, amount = ?, total_amount = ?,
+            buyer_tax_id = ?, seller_tax_id = ?
             WHERE id = ?
             """,
             (data.get('buyer_name'), data.get('seller_name'), data.get('issue_date'),
-             data.get('amount'), data.get('total_amount'), invoice_id)
+             data.get('amount'), data.get('total_amount'), data.get('buyer_tax_id'),
+             data.get('seller_tax_id'), invoice_id)
         )
         db.commit()
         return True
