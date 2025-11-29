@@ -1,11 +1,25 @@
-# 忽略 Python 缓存
+# IDE
+.idea/
+
+# Python
 __pycache__/
 *.pyc
-
-# 忽略 数据库文件
-*.db
-*.sqlite3
-
-# 忽略 虚拟环境 (如果有)
+*.pyo
+*.pyd
+.Python
+env/
 venv/
 .env
+
+# 数据库
+*.db
+*.sqlite3
+instance/
+
+# 运行时生成的文件
+uploads/
+extracted_invoices/
+
+# 操作系统
+.DS_Store
+Thumbs.db
